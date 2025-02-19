@@ -3,6 +3,8 @@
 #include <QVector>
 #include <QCommandLineParser>
 #include <QFile>
+#include <QThread>
+#include <QDateTime>
 
 #include "decoder.h"
 #include "adcmemulatequery.h"
@@ -41,13 +43,13 @@ void process(const ADCMEmulateQuery &query)
     const ChannelMap pre;
     Decoder decoder(query.input.toStdString(), pre);
     auto p{decoder.positionsOfCMAPHeaders()};
-
-    QList<long> qp{QVector<long>(p.begin(), p.end())};
-    if (!qp.empty())
+    QList<long> positions{QVector<long>(p.begin(), p.end())};
+    if (!positions.empty())
     {
         auto begin{query.begin};
         auto size{query.size};
-        auto c{isCorrect(begin, size, qp.size())};
+        auto delay{query.delay};
+        auto c{isCorrect(begin, size, positions.size())};
         if (!c)
         {
             return;
@@ -57,26 +59,47 @@ void process(const ADCMEmulateQuery &query)
             qInfo() << "Can't open input file " << query.input;
             return;
         }
-        qp.push_back(inputFile.size());
+        positions.push_back(inputFile.size());
 
         QFile outputFile(query.output);
         if (!outputFile.open(QIODevice::WriteOnly)) {
             qInfo() << "Can't open output file" << query.output;
             return;
         }
+
         QDataStream in(&inputFile);
-        in.device()->seek(qp[begin]);
         QDataStream out(&outputFile);
+
+        struct SelectedPosition {
+            long position;
+            qsizetype size;
+        };
+
+        QList<SelectedPosition> selectedPositions;
+
         for (auto i{begin}; i < begin + size; ++i)
         {
-            QByteArray ba(qp[i + 1] - qp[i], 0);
+            selectedPositions.push_back({positions[i], positions[i + 1] - positions[i]});
+        }
+
+        for (const auto& item : selectedPositions)
+        {
+            QByteArray ba(item.size, 0);
+            in.device()->seek(item.position);
             auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
             if (rb == ba.size())
             {
+                if (delay)
+                {
+                    QThread::msleep(delay);
+                    outputFile.resize(0);
+                    out.device()->seek(0);
+                    qInfo() << QDateTime::currentDateTime();
+                }
                 out.writeRawData(ba.data(), static_cast<int>(ba.size()));
             }
-            ba.clear();
         }
+
         inputFile.close();
         outputFile.close();
     }

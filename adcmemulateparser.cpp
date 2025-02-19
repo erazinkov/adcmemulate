@@ -42,13 +42,15 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     parser_.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     const QCommandLineOption beginOption("b", "Begin spill index (default = 1)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
-    const QCommandLineOption sizeOption("s", "Size of chunk (number of spills, default = 1)", "s");
-    const QCommandLineOption numberOption("n", "Number of chunks (default = 1)", "n");
+    const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "s");
+    const QCommandLineOption numberOption("n", "Number of chunks (-ge 1, default = 1)", "n");
+    const QCommandLineOption delayOption("d", "Turn on adcm emulation mode with period in msecs (-ge 1000)", "d");
 
     parser_.addOption(beginOption);
     parser_.addOption(endOption);
     parser_.addOption(sizeOption);
     parser_.addOption(numberOption);
+    parser_.addOption(delayOption);
     parser_.addPositionalArgument("input", "Input file name.");
     parser_.addPositionalArgument("output", "Output file name.");
     const QCommandLineOption helpOption = parser_.addHelpOption();
@@ -96,6 +98,15 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
         if (query_.number < 1 || !ok)
         {
             return { Status::Error, QString("Incorrect number of chunks: %1").arg(query_.number) };
+        }
+    }
+
+    if (parser_.isSet(delayOption)) {
+        bool ok;
+        query_.delay = parser_.value(delayOption).toUInt(&ok);
+        if (query_.delay < 1'000 || !ok)
+        {
+            return { Status::Error, QString("Incorrect delay: %1").arg(query_.delay) };
         }
     }
 
