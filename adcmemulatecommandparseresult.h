@@ -1,0 +1,11 @@
+#ifndef ADCMEMULATECOMMANDPARSERESULT_H
+#define ADCMEMULATECOMMANDPARSERESULT_H
+
+
+class ADCMEmulateCommandParseResult
+{
+public:
+    ADCMEmulateCommandParseResult();
+};
+
+#endif // ADCMEMULATECOMMANDPARSERESULT_H
