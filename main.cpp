@@ -82,6 +82,49 @@ void process(const ADCMEmulateQuery &query)
     }
 }
 
+void processBi()
+{
+    const ChannelMap pre;
+    const QString fileNameInput{"/home/egor/shares/tmp/proba_t2_thin_2"};
+    QString fileNameOutput{"test"};
+    Decoder decoder(fileNameInput.toStdString(), pre);
+    auto p{decoder.positionsOfCMAPHeaders()};
+
+    QList<long> qp{QVector<long>(p.begin(), p.end())};
+    if (!qp.empty())
+    {
+        QFile inputFile(fileNameInput);
+        if (!inputFile.open(QIODevice::ReadOnly)) {
+            qInfo() << "Can't open input file " << fileNameInput;
+            return;
+        }
+        qp.push_back(inputFile.size());
+
+
+
+//        QFile outputFile(query.output);
+//        if (!outputFile.open(QIODevice::WriteOnly)) {
+//            qInfo() << "Can't open output file" << query.output;
+//            return;
+//        }
+//        QDataStream in(&inputFile);
+//        in.device()->seek(qp[begin]);
+//        QDataStream out(&outputFile);
+//        for (auto i{begin}; i < begin + size; ++i)
+//        {
+//            QByteArray ba(qp[i + 1] - qp[i], 0);
+//            auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
+//            if (rb == ba.size())
+//            {
+//                out.writeRawData(ba.data(), static_cast<int>(ba.size()));
+//            }
+//            ba.clear();
+//        }
+        inputFile.close();
+//        outputFile.close();
+    }
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -91,17 +134,18 @@ int main(int argc, char *argv[])
 
     QTimer::singleShot(0, [] ()
     {
-        QCommandLineParser parser;
-        ADCMEmulateQuery query;
-        ADCMEmulateParser adcmEmulateParser(parser, query);
-        auto parseResult = adcmEmulateParser.parseResult();
-        if (parseResult)
-        {
-            auto start = std::chrono::steady_clock::now();
-            process(query);
-            auto stop = std::chrono::steady_clock::now();
-            std::cout << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
-        }
+        processBi();
+//        QCommandLineParser parser;
+//        ADCMEmulateQuery query;
+//        ADCMEmulateParser adcmEmulateParser(parser, query);
+//        auto parseResult = adcmEmulateParser.parseResult();
+//        if (parseResult)
+//        {
+//            auto start = std::chrono::steady_clock::now();
+//            process(query);
+//            auto stop = std::chrono::steady_clock::now();
+//            std::cout << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
+//        }
         QCoreApplication::exit(0);
     });
 
