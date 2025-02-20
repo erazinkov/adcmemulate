@@ -40,15 +40,17 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
 
     parser_.setApplicationDescription("Emulate and handle adcm data program.");
     parser_.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    const QCommandLineOption beginOption("b", "Begin spill index (default = 1)", "begin");
+    const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
-    const QCommandLineOption sizeOption("s", "Size of chunk (number of spills, default = 1)", "s");
-    const QCommandLineOption numberOption("n", "Number of chunks (default = 1)", "n");
+    const QCommandLineOption sizeOption("s", "Size of chunk (number of spills, default = 1)", "size");
+    const QCommandLineOption numberOption("n", "Number of chunks (unused)", "number");
+    const QCommandLineOption overlapOption("o", "Overlap size (number of spills, default = 0)", "overlap");
 
     parser_.addOption(beginOption);
     parser_.addOption(endOption);
     parser_.addOption(sizeOption);
     parser_.addOption(numberOption);
+    parser_.addOption(overlapOption);
     parser_.addPositionalArgument("input", "Input file name.");
     parser_.addPositionalArgument("output", "Output file name.");
     const QCommandLineOption helpOption = parser_.addHelpOption();
@@ -96,6 +98,15 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
         if (query_.number < 1 || !ok)
         {
             return { Status::Error, QString("Incorrect number of chunks: %1").arg(query_.number) };
+        }
+    }
+
+    if (parser_.isSet(overlapOption)) {
+        bool ok;
+        query_.overlap = parser_.value(overlapOption).toUInt(&ok);
+        if (query_.overlap < 0 || !ok)
+        {
+            return { Status::Error, QString("Incorrect overlap: %1").arg(query_.overlap) };
         }
     }
 

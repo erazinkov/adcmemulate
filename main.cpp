@@ -20,69 +20,24 @@ bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizet
 {
     if (argBegin > pSize - 1)
     {
-        qInfo() << "'begin' le" <<  pSize - 1;
+        std::cout << "'begin' le" <<  pSize - 1 << std::endl;
         return false;
     }
     if (argSize > pSize)
     {
-        qInfo() << "'size' le" <<  pSize;
+        std::cout << "'size' le" <<  pSize << std::endl;
         return false;
     }
     if (argBegin + argSize > pSize)
     {
-        qInfo() << "'begin' + 'size' le" <<  pSize;
+        std::cout << "'begin' + 'size' le" <<  pSize << std::endl;
         return false;
     }
     return true;
 }
 
-void process(const ADCMEmulateQuery &query)
-{
-    const ChannelMap pre;
-    Decoder decoder(query.input.toStdString(), pre);
-    auto p{decoder.positionsOfCMAPHeaders()};
 
-    QList<long> qp{QVector<long>(p.begin(), p.end())};
-    if (!qp.empty())
-    {
-        auto begin{query.begin};
-        auto size{query.size};
-        auto c{isCorrect(begin, size, qp.size())};
-        if (!c)
-        {
-            return;
-        }
-        QFile inputFile(query.input);
-        if (!inputFile.open(QIODevice::ReadOnly)) {
-            qInfo() << "Can't open input file " << query.input;
-            return;
-        }
-        qp.push_back(inputFile.size());
-
-        QFile outputFile(query.output);
-        if (!outputFile.open(QIODevice::WriteOnly)) {
-            qInfo() << "Can't open output file" << query.output;
-            return;
-        }
-        QDataStream in(&inputFile);
-        in.device()->seek(qp[begin]);
-        QDataStream out(&outputFile);
-        for (auto i{begin}; i < begin + size; ++i)
-        {
-            QByteArray ba(qp[i + 1] - qp[i], 0);
-            auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
-            if (rb == ba.size())
-            {
-                out.writeRawData(ba.data(), static_cast<int>(ba.size()));
-            }
-            ba.clear();
-        }
-        inputFile.close();
-        outputFile.close();
-    }
-}
-
-void processBi()
+void processBi(const ADCMEmulateQuery &query)
 {
     std::vector<std::pair<u_int8_t, u_int8_t> > mapBi
     {
@@ -121,7 +76,7 @@ void processBi()
     };
 
     const ChannelMap pre;
-    const QString fileNameInput{"/home/egor/shares/tmp/proba_t2_thin_2"};
+    const QString fileNameInput{query.input};
 
     Decoder decoder(fileNameInput.toStdString(), pre);
     auto p{decoder.positionsOfCMAPHeaders()};
@@ -130,12 +85,12 @@ void processBi()
 
     if (!positions.empty())
     {
-        auto begin{0};
-        auto size{30};
-        auto overlap{0};
+        auto begin{query.begin};
+        auto size{query.size};
+        auto overlap{query.overlap};
         QFile inputFile(fileNameInput);
         if (!inputFile.open(QIODevice::ReadOnly)) {
-            qInfo() << "Can't open input file " << fileNameInput;
+            std::cout << "Can't open input file" << fileNameInput.toStdString() << std::endl;
             return;
         }
         positions.push_back(inputFile.size());
@@ -150,12 +105,13 @@ void processBi()
 
         while (begin < end - size - overlap)
         {
+            auto start = std::chrono::steady_clock::now();
             QString fileNameOutput{fileNameInput};
             QString postFix = QString("_from_%1_to_%2").arg(begin).arg(begin + size - 1);
             fileNameOutput.append(postFix);
             QFile outputFile(fileNameOutput);
             if (!outputFile.open(QIODevice::WriteOnly)) {
-                qInfo() << "Can't open output file" << fileNameOutput;
+                std::cout << "Can't open output file" << fileNameOutput.toStdString() << std::endl;
                 return;
             }
             QDataStream out(&outputFile);
@@ -165,6 +121,7 @@ void processBi()
                 selectedPositions.push_back({positions[i], positions[i + 1] - positions[i]});
             }
 
+            auto pb{0};
             for (const auto& item : selectedPositions)
             {
                 QByteArray ba(item.size, 0);
@@ -172,37 +129,24 @@ void processBi()
                 auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
                 if (rb == ba.size())
                 {
+                    pb += rb;
                     out.writeRawData(ba.data(), static_cast<int>(ba.size()));
                 }
             }
-            qInfo() << "File:" << fileNameOutput << "From:" << begin << "To:" << begin + size - 1;
             outputFile.close();
             begin += size;
             begin -= overlap;
+            auto stop = std::chrono::steady_clock::now();
+            if (pb)
+            {
+                std::cout << "File: " << fileNameOutput.toStdString() << " "
+                          << "Bytes: " << pb << " "
+                          << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+                          << std::endl;
+            }
+
         }
-
-
-
-//        QFile outputFile(query.output);
-//        if (!outputFile.open(QIODevice::WriteOnly)) {
-//            qInfo() << "Can't open output file" << query.output;
-//            return;
-//        }
-//        QDataStream in(&inputFile);
-//        in.device()->seek(qp[begin]);
-//        QDataStream out(&outputFile);
-//        for (auto i{begin}; i < begin + size; ++i)
-//        {
-//            QByteArray ba(qp[i + 1] - qp[i], 0);
-//            auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
-//            if (rb == ba.size())
-//            {
-//                out.writeRawData(ba.data(), static_cast<int>(ba.size()));
-//            }
-//            ba.clear();
-//        }
         inputFile.close();
-//        outputFile.close();
     }
 }
 
@@ -215,18 +159,14 @@ int main(int argc, char *argv[])
 
     QTimer::singleShot(0, [] ()
     {
-        processBi();
-//        QCommandLineParser parser;
-//        ADCMEmulateQuery query;
-//        ADCMEmulateParser adcmEmulateParser(parser, query);
-//        auto parseResult = adcmEmulateParser.parseResult();
-//        if (parseResult)
-//        {
-//            auto start = std::chrono::steady_clock::now();
-//            process(query);
-//            auto stop = std::chrono::steady_clock::now();
-//            std::cout << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
-//        }
+        QCommandLineParser parser;
+        ADCMEmulateQuery query;
+        ADCMEmulateParser adcmEmulateParser(parser, query);
+        auto parseResult = adcmEmulateParser.parseResult();
+        if (parseResult)
+        {
+            processBi(query);
+        }
         QCoreApplication::exit(0);
     });
 
