@@ -44,7 +44,7 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
     const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "s");
     const QCommandLineOption numberOption("n", "Number of chunks (-ge 1, default = 1)", "n");
-    const QCommandLineOption delayOption("d", "Turn on adcm emulation mode with period in msecs (-ge 1000)", "d");
+    const QCommandLineOption delayOption("d", "Turn on adcm emulation mode with delay in msecs (-ge 1000)", "d");
 
     parser_.addOption(beginOption);
     parser_.addOption(endOption);
