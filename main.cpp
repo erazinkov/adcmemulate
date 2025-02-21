@@ -18,21 +18,26 @@ void spinner()
     pos = (pos + 1) % 4;
 }
 
-bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizetype &pSize)
+bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizetype &argOverlap, const qsizetype &pSize)
 {
     if (argBegin > pSize - 1)
     {
-        std::cout << "'begin' -le " <<  pSize - 1 << std::endl;
+        std::cout << "Ensure 'begin' -le " <<  pSize - 1 << std::endl;
         return false;
     }
     if (argSize > pSize)
     {
-        std::cout << "'size' -le " <<  pSize << std::endl;
+        std::cout << "Ensure 'size' -le " <<  pSize << std::endl;
         return false;
     }
     if (argBegin + argSize > pSize)
     {
-        std::cout << "'begin' + 'size' -le " << pSize << std::endl;
+        std::cout << "Ensure 'begin' + 'size' -le " << pSize << std::endl;
+        return false;
+    }
+    if (argOverlap - argSize > 0)
+    {
+        std::cout << "Ensure 'overlap' -l 'size'" << std::endl;
         return false;
     }
     return true;
@@ -45,13 +50,15 @@ void process(const ADCMEmulateQuery &query)
     auto p{decoder.positionsOfCMAPHeaders()};
 
     QList<long> positions{QVector<long>(p.begin(), p.end())};
-    std::cout << positions.size() << std::endl;
+
     if (!positions.empty())
     {
         auto delay{query.delay};
         auto begin{query.begin};
         auto size{query.size};
-        auto c{isCorrect(begin, size, positions.size())};
+        auto overlap{query.overlap};
+
+        auto c{isCorrect(begin, size, overlap, positions.size())};
         if (!c)
         {
             return;
@@ -63,7 +70,7 @@ void process(const ADCMEmulateQuery &query)
             return;
         }
         positions.push_back(inputFile.size());
-
+        auto end{positions.size()};
         QDataStream in(&inputFile);
 
         struct SelectedPosition {
@@ -75,10 +82,15 @@ void process(const ADCMEmulateQuery &query)
 
         if (delay)
         {
-            for (auto i{begin}; i < positions.size() - 1; ++i)
+            for (auto i{begin}; i < end - 1; ++i)
             {
                 selectedPositions.push_back({positions[i], positions[i + 1] - positions[i]});
             }
+            std::cout << std::left
+                      << std::setw(20) << "Position"
+                      << std::setw(20) << "Bytes"
+                      << std::setw(20) << "Time"
+                      << std::endl;
             for (const auto& item : selectedPositions)
             {
                 QByteArray ba(item.size, 0);
@@ -95,9 +107,10 @@ void process(const ADCMEmulateQuery &query)
                     QDataStream out(&outputFile);
                     out.writeRawData(ba.data(), static_cast<int>(ba.size()));
                     outputFile.close();
-                    std::cout << "Position: " << item.position
-                              << " Bytes: " << rb
-                              << " - " << QDateTime::currentDateTime().toString().toStdString()
+                    std::cout << std::left
+                              << std::setw(20) << item.position
+                              << std::setw(20) << rb
+                              << std::setw(20) << QDateTime::currentDateTime().toString().toStdString()
                               << std::endl;
                     QThread::msleep(delay);
                 }
@@ -110,72 +123,62 @@ void process(const ADCMEmulateQuery &query)
             return;
         }
 
-        QFile outputFile(query.output);
-        if (!outputFile.open(QIODevice::WriteOnly))
-        {
-            std::cout << "Can't open output file " << query.output.toStdString() << std::endl;
-            return;
-        }
 
-        QDataStream out(&outputFile);
-
-        for (const auto& item : selectedPositions)
+        std::cout << std::left
+                  << std::setw(30) << "File"
+                  << std::setw(20) << "Bytes"
+                  << std::setw(20) << "Time"
+                  << std::endl;
+        while (begin < end - size - overlap)
         {
-            QByteArray ba(item.size, 0);
-            in.device()->seek(item.position);
-            auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
-            if (rb == ba.size())
+            auto start = std::chrono::steady_clock::now();
+            QString fileNameOutput{query.output};
+            QString postFix = QString("_%1_%2").arg(begin).arg(begin + size  + ( size != 1 ? -1 : 0));
+            fileNameOutput.append(postFix);
+            QFile outputFile(fileNameOutput);
+            if (!outputFile.open(QIODevice::WriteOnly))
             {
-                if (delay)
-                {
-                    QThread::msleep(delay);
-                    outputFile.resize(0);
-                    out.device()->seek(0);
-                    std::cout << QDateTime::currentDateTime().toString().toStdString() << std::endl;
-                }
-                out.writeRawData(ba.data(), static_cast<int>(ba.size()));
-            }
-            else
-            {
-                std::cout << "Can't read spill at " << item.position << std::endl;
+                std::cout << "Can't open output file" << fileNameOutput.toStdString() << std::endl;
                 return;
             }
+            QDataStream out(&outputFile);
+            QList<SelectedPosition> selectedPositions;
+            for (auto i{begin}; i < begin + size; ++i)
+            {
+                selectedPositions.push_back({positions[i], positions[i + 1] - positions[i]});
+            }
+
+            auto pb{0};
+            for (const auto& item : selectedPositions)
+            {
+                QByteArray ba(item.size, 0);
+                in.device()->seek(item.position);
+                auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
+                if (rb == ba.size())
+                {
+                    pb += rb;
+                    out.writeRawData(ba.data(), static_cast<int>(ba.size()));
+                }
+                else
+                {
+                    std::cout << "Incorrect size of spill at " << item.position << std::endl;
+                    return;
+                }
+            }
+            outputFile.close();
+            begin += size;
+            begin -= overlap;
+            auto stop = std::chrono::steady_clock::now();
+            if (pb)
+            {
+                std::cout << std::left
+                          << std::setw(30) << fileNameOutput.toStdString()
+                          << std::setw(20) << pb
+                          << std::setw(20) << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+                          << std::endl;
+            }
         }
-
-//        QFile outputFile(query.output);
-//        if (!outputFile.open(QIODevice::WriteOnly))
-//        {
-//            std::cout << "Can't open output file " << query.output.toStdString() << std::endl;
-//            return;
-//        }
-
-//        QDataStream out(&outputFile);
-
-//        for (const auto& item : selectedPositions)
-//        {
-//            QByteArray ba(item.size, 0);
-//            in.device()->seek(item.position);
-//            auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
-//            if (rb == ba.size())
-//            {
-//                if (delay)
-//                {
-//                    QThread::msleep(delay);
-//                    outputFile.resize(0);
-//                    out.device()->seek(0);
-//                    std::cout << QDateTime::currentDateTime().toString().toStdString() << std::endl;
-//                }
-//                out.writeRawData(ba.data(), static_cast<int>(ba.size()));
-//            }
-//            else
-//            {
-//                std::cout << "Can't read spill at " << item.position << std::endl;
-//                return;
-//            }
-//        }
-
         inputFile.close();
-//        outputFile.close();
     }
 }
 

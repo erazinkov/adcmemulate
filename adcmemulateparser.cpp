@@ -43,18 +43,21 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
     const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "size");
-    const QCommandLineOption numberOption("n", "Number of chunks (-ge 1, default = 1)", "number");
+    const QCommandLineOption numberOption("n", "Number of chunks (unused, -ge 1, default = 1)", "number");
     const QCommandLineOption delayOption("d",
                                          "Turn on adcm emulation mode with delay in msecs (-ge 1000). "
-                                         "In emulation mode size of chunk 's' is fix to 1.",
+                                         "In emulation mode <size> -e 1.",
                                          "delay"
                                          );
+    const QCommandLineOption overlapOption("o", "Size of chunk overlap (-ge 0, default = 0)", "overlap");
 
     parser_.addOption(beginOption);
-    parser_.addOption(endOption);
+
     parser_.addOption(sizeOption);
-    parser_.addOption(numberOption);
     parser_.addOption(delayOption);
+    parser_.addOption(overlapOption);
+    parser_.addOption(numberOption);
+    parser_.addOption(endOption);
     parser_.addPositionalArgument("input", "Input file name.");
     parser_.addPositionalArgument("output", "Output file name.");
     const QCommandLineOption helpOption = parser_.addHelpOption();
@@ -111,6 +114,15 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
         if (query_.delay < 1'000 || !ok)
         {
             return { Status::Error, QString("Incorrect delay: %1").arg(query_.delay) };
+        }
+    }
+
+    if (parser_.isSet(overlapOption)) {
+        bool ok;
+        query_.overlap = parser_.value(overlapOption).toUInt(&ok);
+        if (query_.overlap < 0 || !ok)
+        {
+            return { Status::Error, QString("Incorrect overlap: %1").arg(query_.overlap) };
         }
     }
 
