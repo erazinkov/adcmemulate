@@ -40,11 +40,15 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
 
     parser_.setApplicationDescription("Emulate and handle adcm data program.");
     parser_.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    const QCommandLineOption beginOption("b", "Begin spill index (default = 1)", "begin");
+    const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
-    const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "s");
-    const QCommandLineOption numberOption("n", "Number of chunks (-ge 1, default = 1)", "n");
-    const QCommandLineOption delayOption("d", "Turn on adcm emulation mode with delay in msecs (-ge 1000)", "d");
+    const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "size");
+    const QCommandLineOption numberOption("n", "Number of chunks (-ge 1, default = 1)", "number");
+    const QCommandLineOption delayOption("d",
+                                         "Turn on adcm emulation mode with delay in msecs (-ge 1000). "
+                                         "In emulation mode size of chunk 's' is fix to 1.",
+                                         "delay"
+                                         );
 
     parser_.addOption(beginOption);
     parser_.addOption(endOption);
