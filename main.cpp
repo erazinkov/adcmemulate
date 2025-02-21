@@ -71,6 +71,7 @@ void process(const ADCMEmulateQuery &query)
         }
         positions.push_back(inputFile.size());
         auto end{positions.size()};
+
         QDataStream in(&inputFile);
 
         struct SelectedPosition {
