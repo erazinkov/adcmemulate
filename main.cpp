@@ -45,7 +45,7 @@ bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizet
 
 void process(const ADCMEmulateQuery &query)
 {
-    const ChannelMap pre = ChannelMap::mapNAP();
+    const ChannelMap pre = ChannelMap::mapSTD();
     Decoder decoder(query.input.toStdString(), pre);
     auto p{decoder.positionsOfCMAPHeaders()};
 
