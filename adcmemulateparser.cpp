@@ -42,14 +42,14 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     parser_.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
-    const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "size");
-    const QCommandLineOption numberOption("n", "Number of chunks (unused, -ge 1, default = 1)", "number");
+    const QCommandLineOption sizeOption("s", "Size of chunk (>= 1, default = 1)", "size");
+    const QCommandLineOption numberOption("n", "Number of chunks (unused, >= 1, default = 1)", "number");
     const QCommandLineOption delayOption("d",
-                                         "Turn on adcm emulation mode with delay in msecs (-ge 1000). "
+                                         "Turn on adcm emulation mode with delay in msecs (>= 1000). "
                                          "In emulation mode <size> -e 1.",
                                          "delay"
                                          );
-    const QCommandLineOption overlapOption("o", "Size of chunk overlap (-ge 0, default = 0)", "overlap");
+    const QCommandLineOption overlapOption("o", "Size of chunk overlap (>= 0, default = 0)", "overlap");
 
     parser_.addOption(beginOption);
 
