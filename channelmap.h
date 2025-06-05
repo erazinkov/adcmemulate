@@ -25,6 +25,7 @@ class ChannelMap
 public:
     static ChannelMap mapNAP();
     static ChannelMap mapSTD();
+    static ChannelMap mapPULPA();
     unsigned long numberOfChannelsAlpha() const;
     u_int8_t numberByChannel(unsigned long) const;
     u_int8_t typeByChannel(unsigned long) const;

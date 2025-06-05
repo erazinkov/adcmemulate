@@ -45,7 +45,7 @@ bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizet
 
 void process(const ADCMEmulateQuery &query)
 {
-    const ChannelMap pre = ChannelMap::mapNAP();
+    const ChannelMap pre = ChannelMap::mapPULPA();
     Decoder decoder(query.input.toStdString(), pre);
     auto p{decoder.positionsOfCMAPHeaders()};
 
@@ -106,12 +106,11 @@ void process(const ADCMEmulateQuery &query)
                         return;
                     }
                     QDataStream out(&outputFile);
-                    out.writeRawData(ba.data(), static_cast<int>(ba.size()));
+                    auto wb = out.writeRawData(ba.data(), static_cast<int>(ba.size()));
                     outputFile.close();
                     std::cout << std::left
                               << std::setw(20) << item.position
-                              << std::setw(20) << rb
-                              << std::setw(20) << QDateTime::currentDateTime().toString().toStdString()
+                              << std::setw(20) << wb                              << std::setw(20) << QDateTime::currentDateTime().toString().toStdString()
                               << std::endl;
                     QThread::msleep(delay);
                 }
@@ -173,9 +172,9 @@ void process(const ADCMEmulateQuery &query)
             if (pb)
             {
                 std::cout << std::left
-                          << std::setw(30) << fileNameOutput.toStdString()
-                          << std::setw(20) << pb
-                          << std::setw(20) << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
+                          << std::setw(40) << fileNameOutput.toStdString()
+                          << std::setw(30) << pb
+                          << std::setw(30) << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count()
                           << std::endl;
             }
         }

@@ -69,6 +69,46 @@ ChannelMap ChannelMap::mapSTD()
     return ChannelMap(map);
 }
 
+ChannelMap ChannelMap::mapPULPA()
+{
+    std::vector<std::pair<u_int8_t, u_int8_t>> map
+    {
+        {GAMMA, 0},
+        {GAMMA, 1},
+        {GAMMA, 2},
+        {GAMMA, 3},
+        {GAMMA, 4},
+        {GAMMA, 5},
+        {GAMMA, 6},
+        {GAMMA, 7},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {UNKNOWN, 111},
+        {ALPHA, 0},
+        {ALPHA, 1},
+        {ALPHA, 2},
+        {ALPHA, 3},
+        {ALPHA, 4},
+        {ALPHA, 5},
+        {ALPHA, 6},
+        {ALPHA, 7},
+        {ALPHA, 8},
+    };
+    return ChannelMap(map);
+}
+
 unsigned long ChannelMap::numberOfChannelsAlpha() const
 {
     return numberOfChannels(ALPHA);
