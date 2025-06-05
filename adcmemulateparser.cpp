@@ -43,10 +43,11 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused)", "end");
     const QCommandLineOption sizeOption("s", "Size of chunk (>= 1, default = 1)", "size");
+    const QCommandLineOption tailOption("t", "Save tail chunk");
     const QCommandLineOption numberOption("n", "Number of chunks (unused, >= 1, default = 1)", "number");
     const QCommandLineOption delayOption("d",
                                          "Turn on adcm emulation mode with delay in msecs (>= 1000). "
-                                         "In emulation mode <size> -e 1.",
+                                         "In emulation mode size of chunk is 1.",
                                          "delay"
                                          );
     const QCommandLineOption overlapOption("o", "Size of chunk overlap (>= 0, default = 0)", "overlap");
@@ -54,6 +55,7 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     parser_.addOption(beginOption);
 
     parser_.addOption(sizeOption);
+    parser_.addOption(tailOption);
     parser_.addOption(delayOption);
     parser_.addOption(overlapOption);
     parser_.addOption(numberOption);
@@ -97,6 +99,10 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
         {
             return { Status::Error, QString("Incorrect chunk size: %1").arg(query_.size) };
         }
+    }
+
+    if (parser_.isSet(tailOption)) {
+        query_.tail = true;
     }
 
     if (parser_.isSet(numberOption)) {
