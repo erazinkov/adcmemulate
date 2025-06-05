@@ -125,9 +125,9 @@ void process(const ADCMEmulateQuery &query)
 
 
         std::cout << std::left
-                  << std::setw(30) << "File"
-                  << std::setw(20) << "Bytes"
-                  << std::setw(20) << "Time"
+                  << std::setw(40) << "File"
+                  << std::setw(30) << "Bytes"
+                  << std::setw(30) << "Time"
                   << std::endl;
         while (begin < end - size - overlap)
         {
