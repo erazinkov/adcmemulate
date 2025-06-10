@@ -10,6 +10,14 @@
 #include "adcmemulatequery.h"
 #include "adcmemulateparser.h"
 
+#include "myprocess.h"
+#include "controller.h"
+#include "mainclass.h"
+
+#include <QDebug>
+#include <csignal>
+
+
 void spinner()
 {
     static int pos{0};
@@ -244,21 +252,68 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("adcm-emulate-program");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
-    QTimer::singleShot(0, [] ()
+
+//    Controller controller;
+//    controller.operate("Start");
+//    QObject::connect(&a, &QCoreApplication::aboutToQuit, &controller, &Controller::stopOperate);
+
+//    QTimer::singleShot(1'000, [&](){
+//        qDebug() << "Timer stopped";
+//        controller.stopOperate();
+//    });
+
+
+
+//    MyProcess myProcess;
+
+//    QObject::connect(&a, &QCoreApplication::aboutToQuit, [&](){
+//        qDebug() << "About ot quit";
+//        a.processEvents();
+//        myProcess.stop();
+//    });
+//    QObject::connect(&myProcess, &MyProcess::finished, [&](){
+//         qDebug() << "Finished";
+//         QCoreApplication::quit();
+//    });
+
+    MainClass mainClass(QCoreApplication::instance());
+
+    struct sigaction hup;
+    hup.sa_handler = mainClass.callSignalHandler;
+    sigemptyset(&hup.sa_mask);
+    hup.sa_flags = 0;
+    hup.sa_flags |= SA_RESTART;
+    if(sigaction(SIGINT, &hup, nullptr))
     {
-        QCommandLineParser parser;
-        ADCMEmulateQuery query;
-        ADCMEmulateParser adcmEmulateParser(parser, query);
-        auto parseResult = adcmEmulateParser.parseResult();
-        if (parseResult)
-        {
-            auto start = std::chrono::steady_clock::now();
-            process(query);
-            auto stop = std::chrono::steady_clock::now();
-            std::cout << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
-        }
-        QCoreApplication::exit(0);
-    });
+        return 1;
+    }
+
+//    signal(SIGTERM,[](int) {QCoreApplication::quit();});
+//    signal(SIGABRT,[](int) {QCoreApplication::quit();});
+//    signal(SIGINT, [](int) {
+//        qDebug() << "SIGINT";
+//        QCoreApplication::quit();
+//    });
+
+//    QTimer::singleShot(0, [&](){
+//        myProcess.process();
+//    });
+
+//    QTimer::singleShot(0, [] ()
+//    {
+//        QCommandLineParser parser;
+//        ADCMEmulateQuery query;
+//        ADCMEmulateParser adcmEmulateParser(parser, query);
+//        auto parseResult = adcmEmulateParser.parseResult();
+//        if (parseResult)
+//        {
+//            auto start = std::chrono::steady_clock::now();
+//            process(query);
+//            auto stop = std::chrono::steady_clock::now();
+//            std::cout << "Time elapsed, ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count() << std::endl;
+//        }
+//        QCoreApplication::exit(0);
+//    });
 
 
     return a.exec();

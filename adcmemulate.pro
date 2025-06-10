@@ -10,8 +10,12 @@ CONFIG -= app_bundle
 SOURCES += \
         adcmemulateparser.cpp \
         channelmap.cpp \
+        controller.cpp \
         decoder.cpp \
-        main.cpp
+        main.cpp \
+        mainclass.cpp \
+        myprocess.cpp \
+        worker.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -23,4 +27,8 @@ HEADERS += \
     adcmemulateparser.h \
     adcmemulatequery.h \
     channelmap.h \
-    decoder.h
+    controller.h \
+    decoder.h \
+    mainclass.h \
+    myprocess.h \
+    worker.h
