@@ -1,13 +1,13 @@
 #include "channelmap.h"
 
-ChannelMap::ChannelMap(std::vector<std::pair<u_int8_t, u_int8_t>> map)
+ChannelMap::ChannelMap(std::vector<std::pair<u_int8_t, u_int32_t>> map)
 {
     map_ = map;
 }
 
 ChannelMap ChannelMap::mapNAP()
 {
-    std::vector<std::pair<u_int8_t, u_int8_t>> map
+    std::vector<std::pair<u_int8_t, u_int32_t>> map
     {
         {GAMMA, 0},
         {GAMMA, 1},
@@ -31,7 +31,7 @@ ChannelMap ChannelMap::mapNAP()
 
 ChannelMap ChannelMap::mapSTD()
 {
-    std::vector<std::pair<u_int8_t, u_int8_t>> map
+    std::vector<std::pair<u_int8_t, u_int32_t>> map
     {
         {GAMMA, 0},
         {GAMMA, 1},
@@ -71,7 +71,7 @@ ChannelMap ChannelMap::mapSTD()
 
 ChannelMap ChannelMap::mapPULPA()
 {
-    std::vector<std::pair<u_int8_t, u_int8_t>> map
+    std::vector<std::pair<u_int8_t, u_int32_t>> map
     {
         {GAMMA, 0},
         {GAMMA, 1},
@@ -109,26 +109,26 @@ ChannelMap ChannelMap::mapPULPA()
     return ChannelMap(map);
 }
 
-unsigned long ChannelMap::numberOfChannelsAlpha() const
+u_int32_t ChannelMap::numberOfChannelsAlpha() const
 {
     return numberOfChannels(ALPHA);
 }
 
-u_int8_t ChannelMap::numberByChannel(unsigned long ch) const
+u_int32_t ChannelMap::numberByChannel(u_int32_t ch) const
 {
     return map_.at(ch).second;
 }
 
-u_int8_t ChannelMap::typeByChannel(unsigned long ch) const
+u_int8_t ChannelMap::typeByChannel(u_int32_t ch) const
 {
     return map_.at(ch).first;
 }
 
-unsigned long ChannelMap::numberOfChannels(EChannelType type) const
+u_int32_t ChannelMap::numberOfChannels(EChannelType type) const
 {
-    unsigned long number{};
+    u_int32_t number{0};
     auto it = map_.begin();
-    while ( (it = std::find_if(it, map_.end(), [&type](std::pair<u_int8_t, int> mapItem){return mapItem.first == type;}) ) != map_.end())
+    while ( (it = std::find_if(it, map_.end(), [&type](std::pair<u_int32_t, int> mapItem){return mapItem.first == type;}) ) != map_.end())
     {
         ++number;
         ++it;
@@ -156,7 +156,7 @@ bool ChannelMap::isCorrect(std::vector<u_int8_t> &map) const {
     return true;
 }
 
-const std::vector<std::pair<u_int8_t, u_int8_t> > &ChannelMap::map() const
+const std::vector<std::pair<u_int8_t, u_int32_t> > &ChannelMap::map() const
 {
     return map_;
 }

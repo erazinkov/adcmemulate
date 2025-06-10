@@ -14,7 +14,7 @@ std::vector<dec_ev_t> &Decoder::events()
     return events_;
 }
 
-std::vector<dec_cnt_t> &Decoder::counters()
+dec_cnt_t &Decoder::counters()
 {
     return counters_;
 }
@@ -28,8 +28,7 @@ void Decoder::process()
         return;
     }
 
-    auto number{pre_.numberOfChannelsAlpha()};
-    counters_.resize(number);
+    counters_.rawhits.resize(pre_.numberOfChannelsAlpha());
 
     events_.clear();
 
@@ -103,8 +102,8 @@ void Decoder::process()
                 {
                     case ALPHA:
                     {
-                        counters_[number].rawhits += counters.rawhits[i];
-                        counters_[number].time += counters.time;
+                        counters_.rawhits[number] += counters.rawhits.at(i);
+                        counters_.time += counters.time;
                         break;
                     }
                     default:
@@ -120,9 +119,9 @@ void Decoder::process()
     ifs_.close();
 }
 
-std::vector<long> Decoder::positionsOfCMAPHeaders()
+std::vector<u_int32_t> Decoder::positionsOfCMAPHeaders()
 {
-    std::vector<long> pos{};
+    std::vector<u_int32_t> pos{};
     ifs_.open(fileName_, std::ios::in | std::ios::binary);
     if (!ifs_.is_open())
     {
@@ -135,7 +134,7 @@ std::vector<long> Decoder::positionsOfCMAPHeaders()
     adcm_counters_t counters;
 
     auto c{false};
-    long currentPosition{0};
+    u_int32_t currentPosition{0};
     while (ifs_)
     {
         ifs_ >> hdr;
@@ -165,7 +164,7 @@ std::vector<long> Decoder::positionsOfCMAPHeaders()
             ifs_.ignore(hdr.size);
             continue;
         }
-        ifs_.seekg(1 - static_cast<long long>(sizeof(stor_packet_hdr_t)), std::ios_base::cur);
+        ifs_.seekg(1 - static_cast<u_int32_t>(sizeof(stor_packet_hdr_t)), std::ios_base::cur);
     }
     ifs_.close();
 
