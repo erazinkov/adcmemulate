@@ -77,7 +77,7 @@ struct adcm_counters_t {
 
 struct dec_det_t
 {    
-    uint8_t index;  // detector index
+    uint32_t index;  // detector index
     float amp;      // detector amplitude
     float rt;       // detector signal raise time
 } __attribute__ ((packed));

@@ -31,4 +31,5 @@ HEADERS += \
     decoder.h \
     mainclass.h \
     myprocess.h \
+    progressbar.h \
     worker.h

@@ -14,8 +14,7 @@ public:
     std::vector<u_int32_t> positionsOfCMAPHeaders();
 private:
 
-    std::string fileName_;
-    std::ifstream ifs_;
+    const std::string fileName_;
     ChannelMap pre_;
     std::vector<dec_ev_t> events_;
     dec_cnt_t counters_;
