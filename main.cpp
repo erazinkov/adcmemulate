@@ -17,15 +17,6 @@
 #include <QDebug>
 #include <csignal>
 
-
-void spinner()
-{
-    static int pos{0};
-    const char cursor[4]{'|', '/', '-', '\\'};
-    std::cout << "\r" << cursor[pos] << std::flush;
-    pos = (pos + 1) % 4;
-}
-
 bool isCorrect(const qsizetype &argBegin, const qsizetype &argSize, const qsizetype &argOverlap, const qsizetype &pSize)
 {
     if (argBegin > pSize - 1)

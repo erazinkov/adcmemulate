@@ -8,6 +8,8 @@
 #include "adcmemulatequery.h"
 #include "adcmemulateparser.h"
 
+#include <iostream>
+
 MainClass::MainClass(QObject *parent) : QObject(parent)
 {
     MainClass::setSignalHandlerObject(this);

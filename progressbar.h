@@ -2,6 +2,7 @@
 #define PROGRESSBAR_H
 
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 
 template<typename T>
@@ -31,7 +32,7 @@ public:
                 std::cout << " ";
             }
         }
-        std::cout << "] " << p << " %\r";
+        std::cout << "]" << std::setw(3) << p << "%\r";
         std::cout.flush();
         if (p == 100)
         {
