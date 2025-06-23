@@ -9,6 +9,7 @@ CONFIG -= app_bundle
 
 SOURCES += \
         adcmemulateparser.cpp \
+        adcmemulateprocess.cpp \
         channelmap.cpp \
         controller.cpp \
         decoder.cpp \
@@ -25,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     adcm_df.h \
     adcmemulateparser.h \
+    adcmemulateprocess.h \
     adcmemulatequery.h \
     channelmap.h \
     controller.h \

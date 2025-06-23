@@ -12,10 +12,13 @@ class ADCMEmulateParser
 
 public:
     ADCMEmulateParser();
+    bool ok() const;
 
-    bool parseResult();
+    const ADCMEmulateQuery &query() const;
 
 private:
+    bool m_ok{false};
+
     struct CommandLineParseResult {
         enum class Status {
             Ok,

@@ -2,19 +2,13 @@
 
 ADCMEmulateParser::ADCMEmulateParser()
 {
-}
-
-bool ADCMEmulateParser::parseResult()
-{
     using Status = CommandLineParseResult::Status;
-
-    auto r{false};
 
     auto parseCommandLineResult{parseCommandLine()};
     switch (parseCommandLineResult.statusCode) {
         case Status::Ok:
         {
-            r = true;
+            m_ok = true;
             break;
         }
         case Status::Error:
@@ -30,8 +24,16 @@ bool ADCMEmulateParser::parseResult()
         case Status::HelpRequested:
             m_parser.showHelp();
     }
+}
 
-    return r;
+bool ADCMEmulateParser::ok() const
+{
+    return m_ok;
+}
+
+const ADCMEmulateQuery &ADCMEmulateParser::query() const
+{
+    return m_query;
 }
 
 ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
@@ -40,17 +42,17 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
 
     m_parser.setApplicationDescription("Emulate and handle adcm data program.");
     m_parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    const QCommandLineOption beginOption("b", "Begin spill index (default = 0).", "begin", "0");
+    const QCommandLineOption beginOption("b", "Begin spill index (default = 0).", "begin");
     const QCommandLineOption endOption("e", "End spill index (unused).", "end");
     const QCommandLineOption sizeOption("s", "Size of chunk (>= 1, default = 1).", "size");
     const QCommandLineOption tailOption("t", "Save tail chunk.");
-    const QCommandLineOption numberOption("n", "Number of chunks (unused, >= 1, default = 1).", "number", "1");
+    const QCommandLineOption numberOption("n", "Number of chunks (unused, >= 1, default = 1).", "number");
     const QCommandLineOption delayOption("d",
                                          "Turn on adcm emulation mode with delay in msecs (>= 1000). "
                                          "In emulation mode size of chunk is 1.",
                                          "delay"
                                          );
-    const QCommandLineOption overlapOption("o", "Size of chunk overlap (>= 0, default = 0).", "overlap", "0");
+    const QCommandLineOption overlapOption("o", "Size of chunk overlap (>= 0, default = 0).", "overlap");
 
     m_parser.addOption(beginOption);
 

@@ -5,14 +5,26 @@
 #include <QDebug>
 #include <QThread>
 
+#include "adcmemulateparser.h"
+#include "adcmemulateprocess.h"
+
 void Worker::doWork(const QString &parameter) {
     QString result;
+    ADCMEmulateParser adcmEmulateParser;
+    if (adcmEmulateParser.ok())
+    {
+        Decoder decoder(adcmEmulateParser.query().input.toStdString(), ChannelMap::mapNAP());
+        decoder.process();
+        std::cout << "/home/egor/Documents/tochka_1"
+                  << " MP: " << decoder.offsets().size()
+                  << " TIME: " << decoder.counters().time
+                  << std::endl;
+        ADCMEmulateProcess adcmEmulateProcess(adcmEmulateParser.query(),
+                                              QList<qint64>(decoder.offsets().begin(), decoder.offsets().end()));
+        adcmEmulateProcess.handle();
+    }
     /* ... here is the expensive or blocking operation ... */
-    qDebug() << "Start.";
-    const ChannelMap pre = ChannelMap::mapNAP();
-    Decoder decoder("/home/egor/Documents/sep18-14.48.08", pre);
-    auto p{decoder.positionsOfCMAPHeaders()};
-    std::cout << "/home/egor/Documents/tochka_1" << " MP: " << p.size() << " TIME: " << decoder.counters().time << std::endl;
+
     // long long counter{0};
 
     // while (counter < 100'000 && !this->thread()->isInterruptionRequested())
@@ -22,7 +34,7 @@ void Worker::doWork(const QString &parameter) {
     // }
 
     // qDebug() << "Counter:" << counter;
-    emit resultReady(QString("%1").arg(p.size()));
+    emit resultReady(QString("Finished"));
 }
 
 void Worker::stopWork()
