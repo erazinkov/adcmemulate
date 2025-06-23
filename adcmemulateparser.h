@@ -11,7 +11,7 @@ class ADCMEmulateParser
 {
 
 public:
-    ADCMEmulateParser(QCommandLineParser &, ADCMEmulateQuery &);
+    ADCMEmulateParser();
 
     bool parseResult();
 
@@ -26,8 +26,8 @@ private:
         Status statusCode{Status::Ok};
         std::optional<QString> errorString{std::nullopt};
     };
-    QCommandLineParser &parser_;
-    ADCMEmulateQuery &query_;
+    QCommandLineParser m_parser;
+    ADCMEmulateQuery m_query;
 
     CommandLineParseResult parseCommandLine();
 };

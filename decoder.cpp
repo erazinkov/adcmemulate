@@ -139,7 +139,7 @@ std::vector<u_int32_t> Decoder::positionsOfCMAPHeaders()
 
     stor_packet_hdr_t hdr;
     adcm_cmap_t cmap;
-
+    adcm_counters_t counters;
 
     auto c{false};
     u_int32_t currentPosition{0};
@@ -168,21 +168,20 @@ std::vector<u_int32_t> Decoder::positionsOfCMAPHeaders()
         }
         if (hdr.id == STOR_ID_CNTR && hdr.size > sizeof(stor_packet_hdr_t))
         {
-            // continue;
-            // hdr.size -= sizeof(stor_packet_hdr_t);
-            // ifs.ignore(hdr.size);
-            adcm_counters_t counters;
+            if (!c)
+            {
+                hdr.size -= sizeof(stor_packet_hdr_t);
+                ifs.ignore(hdr.size);
+                continue;
+            }
             ifs >> counters;
-            ifs.ignore(hdr.size - sizeof(stor_packet_hdr_t) - (sizeof(counters.n) +
-                                                               sizeof(counters.time) +
-                                                               sizeof(*counters.rawhits.cbegin()) * counters.n));
+            counters_.time += counters.time;
+            ifs.ignore(hdr.size - sizeof(stor_packet_hdr_t) - (sizeof(counters.n) + sizeof(counters.time) + sizeof(*counters.rawhits.cbegin()) * counters.n));
             continue;
         }
-        std::cout << "Error" << std::endl;
         ifs.seekg(1 - static_cast<u_int32_t>(sizeof(stor_packet_hdr_t)), std::ios_base::cur);
     }
     ifs.close();
-
     return pos;
 }
 

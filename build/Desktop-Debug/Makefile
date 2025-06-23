@@ -170,6 +170,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_post.prf \
+		../../.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/default_pre.prf \
@@ -196,6 +197,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_pre.prf \
 		../../decoder.h \
 		../../mainclass.h \
 		../../myprocess.h \
+		../../progressbar.h \
 		../../worker.h ../../adcmemulateparser.cpp \
 		../../channelmap.cpp \
 		../../controller.cpp \
@@ -310,6 +312,7 @@ Makefile: ../../adcmemulate.pro /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/default_pre.prf \
@@ -426,6 +429,7 @@ Makefile: ../../adcmemulate.pro /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/qt_config.prf:
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/qmake.conf:
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/exclusive_builds.prf:
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/toolchain.prf:
 /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/default_pre.prf:
@@ -461,7 +465,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt6/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../adcm_df.h ../../adcmemulateparser.h ../../adcmemulatequery.h ../../channelmap.h ../../controller.h ../../decoder.h ../../mainclass.h ../../myprocess.h ../../worker.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../adcm_df.h ../../adcmemulateparser.h ../../adcmemulatequery.h ../../channelmap.h ../../controller.h ../../decoder.h ../../mainclass.h ../../myprocess.h ../../progressbar.h ../../worker.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../../adcmemulateparser.cpp ../../channelmap.cpp ../../controller.cpp ../../decoder.cpp ../../main.cpp ../../mainclass.cpp ../../myprocess.cpp ../../worker.cpp $(DISTDIR)/
 
 
@@ -545,7 +549,8 @@ controller.o: ../../controller.cpp ../../controller.h \
 
 decoder.o: ../../decoder.cpp ../../decoder.h \
 		../../adcm_df.h \
-		../../channelmap.h
+		../../channelmap.h \
+		../../progressbar.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o decoder.o ../../decoder.cpp
 
 main.o: ../../main.cpp ../../decoder.h \
@@ -567,7 +572,10 @@ mainclass.o: ../../mainclass.cpp ../../mainclass.h \
 myprocess.o: ../../myprocess.cpp ../../myprocess.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o myprocess.o ../../myprocess.cpp
 
-worker.o: ../../worker.cpp ../../worker.h
+worker.o: ../../worker.cpp ../../worker.h \
+		../../channelmap.h \
+		../../decoder.h \
+		../../adcm_df.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o worker.o ../../worker.cpp
 
 moc_controller.o: moc_controller.cpp 

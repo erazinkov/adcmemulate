@@ -10,9 +10,9 @@ void Worker::doWork(const QString &parameter) {
     /* ... here is the expensive or blocking operation ... */
     qDebug() << "Start.";
     const ChannelMap pre = ChannelMap::mapNAP();
-    Decoder decoder("/home/egor/Documents/proba_t2_thin_1", pre);
+    Decoder decoder("/home/egor/Documents/sep18-14.48.08", pre);
     auto p{decoder.positionsOfCMAPHeaders()};
-    std::cout << "/home/egor/Documents/tochka_1" << " - " << p.size() << std::endl;
+    std::cout << "/home/egor/Documents/tochka_1" << " MP: " << p.size() << " TIME: " << decoder.counters().time << std::endl;
     // long long counter{0};
 
     // while (counter < 100'000 && !this->thread()->isInterruptionRequested())

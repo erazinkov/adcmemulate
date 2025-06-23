@@ -16,12 +16,12 @@ MainClass::MainClass(QObject *parent) : QObject(parent)
     connect(&m_controller, &Controller::handleResults, this, [&](){
         closeApp();
     });
-    m_controller.operate("Start");
+    // m_controller.operate("Start");
 //    QCommandLineParser parser;
 //    ADCMEmulateQuery query;
-//    ADCMEmulateParser adcmEmulateParser(parser, query);
-//    auto parseResult = adcmEmulateParser.parseResult();
-//    qDebug() << parseResult;
+   ADCMEmulateParser adcmEmulateParser;
+   auto parseResult = adcmEmulateParser.parseResult();
+   qDebug() << parseResult;
 }
 
 MainClass *MainClass::realSelf;
@@ -33,6 +33,5 @@ void MainClass::handleSignal(int /*num*/)
 void MainClass::closeApp()
 {
     m_controller.stopOperate();
-    qDebug() << "good bye";
     QCoreApplication::quit();
 }
