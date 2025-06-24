@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.2, 2025-06-23T18:39:59. -->
+<!-- Written by QtCreator 6.0.2, 2025-06-24T14:41:39. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -162,7 +162,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">adcmemulate2</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/egor/projects/adcmemulate/adcmemulate.pro</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/home/egor/projects/adcmemulate/adcmemulate.pro</value>
-    <value type="QString" key="RunConfiguration.Arguments">/home/egor/shares/tmp/tochka_1 adcm.dat.out -s 30 -t</value>
+    <value type="QString" key="RunConfiguration.Arguments">/home/egor/shares/tmp/tochka_1 adcm.dat.out -d 2000</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

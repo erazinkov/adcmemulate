@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QThread>
+#include <QDateTime>
 
 #include "spinner.h"
 
@@ -18,6 +19,11 @@ ADCMEmulateProcess::ADCMEmulateProcess(const ADCMEmulateQuery query,
     }
     m_offsets.push_back(inputFile.size());
     inputFile.close();
+}
+
+void ADCMEmulateProcess::process()
+{
+    m_query.delay ? emulate() : handle();
 }
 
 void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, QDataStream &in) const
@@ -42,7 +48,7 @@ void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, 
     {
         QByteArray ba(item.size, 0);
         in.device()->seek(item.position);
-        auto rb = in.readRawData(ba.data(), static_cast<int>(ba.size()));
+        auto rb{in.readRawData(ba.data(), static_cast<int>(ba.size()))};
         if (rb == ba.size())
         {
             pb += rb;
@@ -66,15 +72,13 @@ void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, 
 
 void ADCMEmulateProcess::handle() const
 {
-
     auto begin{m_query.begin};
     auto end{m_offsets.size()};
 
     QFile inputFile(m_query.input);
     if (!inputFile.open(QIODevice::ReadOnly))
     {
-        qInfo() << "Can't open input file " << m_query.input;
-        return;
+        qFatal("Can't open input file");
     }
     QDataStream in(&inputFile);
 
@@ -86,6 +90,62 @@ void ADCMEmulateProcess::handle() const
     {
         auto size{(end - 1) - begin};
         handleProcess(begin, size, in);
+    }
+    inputFile.close();
+}
+
+void ADCMEmulateProcess::emulate() const
+{
+    auto begin{m_query.begin};
+    auto end{m_offsets.size()};
+
+    QFile inputFile(m_query.input);
+    if (!inputFile.open(QIODevice::ReadOnly))
+    {
+        qFatal("Can't open input file");
+    }
+    QDataStream in(&inputFile);
+
+    QList<SelectedPosition> selectedPositions;
+    for (auto i{begin}; i < end - 1; ++i)
+    {
+        selectedPositions.push_back({m_offsets.at(i), m_offsets.at(i + 1) - m_offsets.at(i)});
+    }
+
+    for (const auto& item : selectedPositions)
+    {
+        if (this->thread()->isInterruptionRequested())
+        {
+            break;
+        }
+        QByteArray ba(item.size, 0);
+        in.device()->seek(item.position);
+        auto rb{in.readRawData(ba.data(), static_cast<int>(ba.size()))};
+        if (rb == ba.size())
+        {
+            QFile outputFile(m_query.output);
+            if (!outputFile.open(QIODevice::WriteOnly))
+            {
+                qFatal("Can't open output file");
+            }
+            QDataStream out(&outputFile);
+            auto wb{out.writeRawData(ba.data(), static_cast<int>(ba.size()))};
+            if (rb != wb)
+            {
+                qInfo() << "Incorrect size of spill at" << item.position;
+            }
+            else
+            {
+                qInfo() << QString("%1").arg(wb) << QDateTime::currentDateTime().toString(Qt::TextDate);
+            }
+            outputFile.close();
+            this->thread()->msleep(m_query.delay);
+        }
+        else
+        {
+            qInfo() << "Incorrect size of spill at" << item.position;
+            return;
+        }
     }
     inputFile.close();
 }

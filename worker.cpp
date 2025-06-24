@@ -15,13 +15,12 @@ void Worker::doWork(const QString &parameter) {
     {
         Decoder decoder(adcmEmulateParser.query().input.toStdString(), ChannelMap::mapNAP());
         decoder.process();
-        std::cout << "/home/egor/Documents/tochka_1"
+        qInfo() << adcmEmulateParser.query().input
                   << " MP: " << decoder.offsets().size()
-                  << " TIME: " << decoder.counters().time
-                  << std::endl;
+                  << " TIME: " << decoder.counters().time;
         ADCMEmulateProcess adcmEmulateProcess(adcmEmulateParser.query(),
                                               QList<qint64>(decoder.offsets().begin(), decoder.offsets().end()));
-        adcmEmulateProcess.handle();
+        adcmEmulateProcess.process();
     }
     /* ... here is the expensive or blocking operation ... */
 

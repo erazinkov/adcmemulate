@@ -4,8 +4,6 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-
-
 #include <iostream>
 
 MainClass::MainClass(QObject *parent) : QObject(parent)
@@ -13,9 +11,6 @@ MainClass::MainClass(QObject *parent) : QObject(parent)
     MainClass::setSignalHandlerObject(this);
     connect(&m_controller, &Controller::handleResults, this, &MainClass::closeApp);
     m_controller.operate("Start");
-//    ADCMEmulateParser adcmEmulateParser;
-//    auto parseResult = adcmEmulateParser.parseResult();
-//    qDebug() << parseResult;
 }
 
 MainClass *MainClass::realSelf;
