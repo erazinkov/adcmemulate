@@ -21,9 +21,39 @@ ADCMEmulateProcess::ADCMEmulateProcess(const ADCMEmulateQuery query,
     inputFile.close();
 }
 
+//bool isValid(const qsizetype &argBegin, const qsizetype &argSize, const qsizetype &argOverlap, const qsizetype &pSize)
+
+bool ADCMEmulateProcess::isValid() const
+{
+    if (m_query.begin > m_offsets.size() - 1 - 1)
+    {
+        qInfo() << "Ensure 'begin' <=" <<  m_offsets.size() - 1 - 1;
+        return false;
+    }
+    if (m_query.size > m_offsets.size() - 1)
+    {
+        qInfo() << "Ensure 'size' <=" <<  m_offsets.size() - 1;
+        return false;
+    }
+    if (m_query.begin + m_query.size > m_offsets.size() - 1)
+    {
+        qInfo() << "Ensure 'begin' + 'size' <=" << m_offsets.size() - 1;
+        return false;
+    }
+    if (m_query.overlap - m_query.size > 0)
+    {
+        qInfo() << "Ensure 'overlap' < 'size'";
+        return false;
+    }
+    return true;
+}
+
 void ADCMEmulateProcess::process()
 {
-    m_query.delay ? emulate() : handle();
+    if (isValid())
+    {
+        m_query.delay ? emulate() : handle();
+    }
 }
 
 void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, QDataStream &in) const

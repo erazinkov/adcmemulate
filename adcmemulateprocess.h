@@ -24,6 +24,8 @@ private:
 
     void handle() const;
     void emulate() const;
+
+    bool isValid() const;
 };
 
 #endif // ADCMEMULATEPROCESS_H

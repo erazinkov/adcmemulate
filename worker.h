@@ -6,10 +6,8 @@
 class Worker : public QObject
 {
     Q_OBJECT
-
 public slots:
     void doWork(const QString &parameter);
-    void stopWork();
 signals:
     void resultReady(const QString &result);
 
