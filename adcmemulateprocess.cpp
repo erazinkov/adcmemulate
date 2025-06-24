@@ -21,8 +21,6 @@ ADCMEmulateProcess::ADCMEmulateProcess(const ADCMEmulateQuery query,
     inputFile.close();
 }
 
-//bool isValid(const qsizetype &argBegin, const qsizetype &argSize, const qsizetype &argOverlap, const qsizetype &pSize)
-
 bool ADCMEmulateProcess::isValid() const
 {
     if (m_query.begin > m_offsets.size() - 1 - 1)
