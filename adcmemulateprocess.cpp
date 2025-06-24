@@ -70,42 +70,8 @@ void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, 
     }
 }
 
-void ADCMEmulateProcess::handle() const
+void ADCMEmulateProcess::emulateProcess(const long long &begin, const long long &end, QDataStream &in) const
 {
-    auto begin{m_query.begin};
-    auto end{m_offsets.size()};
-
-    QFile inputFile(m_query.input);
-    if (!inputFile.open(QIODevice::ReadOnly))
-    {
-        qFatal("Can't open input file");
-    }
-    QDataStream in(&inputFile);
-
-    while (begin < end - m_query.size - m_query.overlap && !this->thread()->isInterruptionRequested())
-    {
-        handleProcess(begin, m_query.size, in);
-    }
-    if (m_query.tail && begin < (end - 1) && !this->thread()->isInterruptionRequested())
-    {
-        auto size{(end - 1) - begin};
-        handleProcess(begin, size, in);
-    }
-    inputFile.close();
-}
-
-void ADCMEmulateProcess::emulate() const
-{
-    auto begin{m_query.begin};
-    auto end{m_offsets.size()};
-
-    QFile inputFile(m_query.input);
-    if (!inputFile.open(QIODevice::ReadOnly))
-    {
-        qFatal("Can't open input file");
-    }
-    QDataStream in(&inputFile);
-
     QList<SelectedPosition> selectedPositions;
     for (auto i{begin}; i < end - 1; ++i)
     {
@@ -147,5 +113,45 @@ void ADCMEmulateProcess::emulate() const
             return;
         }
     }
+}
+
+void ADCMEmulateProcess::handle() const
+{
+    auto begin{m_query.begin};
+    auto end{m_offsets.size()};
+
+    QFile inputFile(m_query.input);
+    if (!inputFile.open(QIODevice::ReadOnly))
+    {
+        qFatal("Can't open input file");
+    }
+    QDataStream in(&inputFile);
+
+    while (begin < end - m_query.size - m_query.overlap && !this->thread()->isInterruptionRequested())
+    {
+        handleProcess(begin, m_query.size, in);
+    }
+    if (m_query.tail && begin < (end - 1) && !this->thread()->isInterruptionRequested())
+    {
+        auto size{(end - 1) - begin};
+        handleProcess(begin, size, in);
+    }
+    inputFile.close();
+}
+
+void ADCMEmulateProcess::emulate() const
+{
+    auto begin{m_query.begin};
+    auto end{m_offsets.size()};
+
+    QFile inputFile(m_query.input);
+    if (!inputFile.open(QIODevice::ReadOnly))
+    {
+        qFatal("Can't open input file");
+    }
+    QDataStream in(&inputFile);
+
+    emulateProcess(begin, end, in);
+
     inputFile.close();
 }

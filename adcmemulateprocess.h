@@ -20,6 +20,7 @@ private:
     QList<qint64> m_offsets;
 
     void handleProcess(long long &, const long long &, QDataStream &) const;
+    void emulateProcess(const long long &, const long long &, QDataStream &) const;
 
     void handle() const;
     void emulate() const;
