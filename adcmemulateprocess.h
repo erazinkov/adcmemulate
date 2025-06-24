@@ -19,6 +19,8 @@ private:
     };
     const ADCMEmulateQuery m_query;
     QList<qint64> m_offsets;
+
+    void handleProcess(long long &, const long long &, QDataStream &) const;
 };
 
 #endif // ADCMEMULATEPROCESS_H

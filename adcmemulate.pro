@@ -34,4 +34,5 @@ HEADERS += \
     mainclass.h \
     myprocess.h \
     progressbar.h \
+    spinner.h \
     worker.h
