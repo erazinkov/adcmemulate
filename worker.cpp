@@ -9,11 +9,10 @@
 #include "adcmemulateprocess.h"
 
 void Worker::doWork(const QString &) {
-    QString result;
     ADCMEmulateParser adcmEmulateParser;
     if (adcmEmulateParser.ok())
     {
-        Decoder decoder(adcmEmulateParser.query().input.toStdString(), ChannelMap::mapNAP());
+        Decoder decoder(adcmEmulateParser.query().input.toStdString(), ChannelMap::mapPULPA());
         decoder.process();
         qInfo() << adcmEmulateParser.query().input
                   << "Mp:" << decoder.offsets().size()

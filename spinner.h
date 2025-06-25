@@ -15,7 +15,7 @@ public:
         bool stop{false};
         std::thread spinner_thread([&]() {
                 while (!stop) {
-                    Spinner::process();
+                    Spinner::show();
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             });
@@ -26,7 +26,7 @@ public:
         std::cout << std::flush;
     }
 private:
-    static void process()
+    static void show()
     {
         static size_t i{0};
         std::vector<char> chars{'/', '-', '\\', '|'};

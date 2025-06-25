@@ -10,9 +10,6 @@ public slots:
     void doWork(const QString &parameter);
 signals:
     void resultReady(const QString &result);
-
-public:
-    bool isCancelled{false};
 };
 
 #endif // WORKER_H
