@@ -25,16 +25,17 @@ class ChannelMap
 public:
     static ChannelMap mapNAP();
     static ChannelMap mapSTD();
-    unsigned long numberOfChannelsAlpha() const;
-    u_int8_t numberByChannel(unsigned long) const;
-    u_int8_t typeByChannel(unsigned long) const;
+    static ChannelMap mapPULPA();
+    u_int32_t numberOfChannelsAlpha() const;
+    u_int32_t numberByChannel(u_int32_t) const;
+    u_int8_t typeByChannel(u_int32_t) const;
     bool isCorrect(std::vector<u_int8_t> &) const;
-    const std::vector<std::pair<u_int8_t, u_int8_t> > &map() const;
+    const std::vector<std::pair<u_int8_t, u_int32_t> > &map() const;
 
 private:
-    std::vector<std::pair<u_int8_t, u_int8_t>> map_;
-    unsigned long numberOfChannels(EChannelType type) const;
-    ChannelMap(std::vector<std::pair<u_int8_t, u_int8_t>> map);
+    std::vector<std::pair<u_int8_t, u_int32_t>> map_;
+    u_int32_t numberOfChannels(EChannelType type) const;
+    ChannelMap(std::vector<std::pair<u_int8_t, u_int32_t>> map);
 };
 
 #endif // CHANNELMAP_H

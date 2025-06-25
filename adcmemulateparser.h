@@ -11,11 +11,14 @@ class ADCMEmulateParser
 {
 
 public:
-    ADCMEmulateParser(QCommandLineParser &, ADCMEmulateQuery &);
+    ADCMEmulateParser();
+    bool ok() const;
 
-    bool parseResult();
+    const ADCMEmulateQuery &query() const;
 
 private:
+    bool m_ok{false};
+
     struct CommandLineParseResult {
         enum class Status {
             Ok,
@@ -26,8 +29,8 @@ private:
         Status statusCode{Status::Ok};
         std::optional<QString> errorString{std::nullopt};
     };
-    QCommandLineParser &parser_;
-    ADCMEmulateQuery &query_;
+    QCommandLineParser m_parser;
+    ADCMEmulateQuery m_query;
 
     CommandLineParseResult parseCommandLine();
 };

@@ -1,20 +1,14 @@
 #include "adcmemulateparser.h"
 
-ADCMEmulateParser::ADCMEmulateParser(QCommandLineParser &parser, ADCMEmulateQuery &query) : parser_(parser), query_(query)
-{
-}
-
-bool ADCMEmulateParser::parseResult()
+ADCMEmulateParser::ADCMEmulateParser()
 {
     using Status = CommandLineParseResult::Status;
-
-    auto r{false};
 
     auto parseCommandLineResult{parseCommandLine()};
     switch (parseCommandLineResult.statusCode) {
         case Status::Ok:
         {
-            r = true;
+            m_ok = true;
             break;
         }
         case Status::Error:
@@ -22,111 +16,125 @@ bool ADCMEmulateParser::parseResult()
             std::fputs(qPrintable(parseCommandLineResult.errorString.value_or("Unknown error occurred")),
                        stderr);
             std::fputs("\n\n", stderr);
-            std::fputs(qPrintable(parser_.helpText()), stderr);
+            std::fputs(qPrintable(m_parser.helpText()), stderr);
             break;
         }
         case Status::VersionRequested:
-            parser_.showVersion();
+            m_parser.showVersion();
         case Status::HelpRequested:
-            parser_.showHelp();
+            m_parser.showHelp();
     }
+}
 
-    return r;
+bool ADCMEmulateParser::ok() const
+{
+    return m_ok;
+}
+
+const ADCMEmulateQuery &ADCMEmulateParser::query() const
+{
+    return m_query;
 }
 
 ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
 {
     using Status = CommandLineParseResult::Status;
 
-    parser_.setApplicationDescription("Emulate and handle adcm data program.");
-    parser_.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    const QCommandLineOption beginOption("b", "Begin spill index (default = 0)", "begin");
-    const QCommandLineOption endOption("e", "End spill index (unused)", "end");
-    const QCommandLineOption sizeOption("s", "Size of chunk (-ge 1, default = 1)", "size");
-    const QCommandLineOption numberOption("n", "Number of chunks (unused, -ge 1, default = 1)", "number");
+    m_parser.setApplicationDescription("Emulate and handle adcm data program.");
+    m_parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    const QCommandLineOption beginOption("b", "Begin spill index (default = 0).", "begin");
+    const QCommandLineOption endOption("e", "End spill index (unused).", "end");
+    const QCommandLineOption sizeOption("s", "Size of chunk (>= 1, default = 1).", "size");
+    const QCommandLineOption tailOption("t", "Save tail chunk.");
+    const QCommandLineOption numberOption("n", "Number of chunks (unused, >= 1, default = 1).", "number");
     const QCommandLineOption delayOption("d",
-                                         "Turn on adcm emulation mode with delay in msecs (-ge 1000). "
-                                         "In emulation mode <size> -e 1.",
+                                         "Turn on adcm emulation mode with delay in msecs (>= 1000). "
+                                         "In emulation mode size of chunk is 1.",
                                          "delay"
                                          );
-    const QCommandLineOption overlapOption("o", "Size of chunk overlap (-ge 0, default = 0)", "overlap");
+    const QCommandLineOption overlapOption("o", "Size of chunk overlap (>= 0, default = 0).", "overlap");
 
-    parser_.addOption(beginOption);
+    m_parser.addOption(beginOption);
 
-    parser_.addOption(sizeOption);
-    parser_.addOption(delayOption);
-    parser_.addOption(overlapOption);
-    parser_.addOption(numberOption);
-    parser_.addOption(endOption);
-    parser_.addPositionalArgument("input", "Input file name.");
-    parser_.addPositionalArgument("output", "Output file name.");
-    const QCommandLineOption helpOption = parser_.addHelpOption();
-    const QCommandLineOption versionOption = parser_.addVersionOption();
+    m_parser.addOption(sizeOption);
+    m_parser.addOption(tailOption);
+    m_parser.addOption(delayOption);
+    m_parser.addOption(overlapOption);
+    m_parser.addOption(numberOption);
+    m_parser.addOption(endOption);
+    m_parser.addPositionalArgument("input", "Input file name.");
+    m_parser.addPositionalArgument("output", "Output file name.");
+    const QCommandLineOption helpOption = m_parser.addHelpOption();
+    const QCommandLineOption versionOption = m_parser.addVersionOption();
 
-    if (!parser_.parse(QCoreApplication::arguments()))
-        return { Status::Error, parser_.errorText() };
+    if (!m_parser.parse(QCoreApplication::arguments()))
+        return { Status::Error, m_parser.errorText() };
 
-    if (parser_.isSet(versionOption))
+    if (m_parser.isSet(versionOption))
         return { Status::VersionRequested };
 
-    if (parser_.isSet(helpOption))
+    if (m_parser.isSet(helpOption))
         return { Status::HelpRequested };
 
-    if (parser_.isSet(beginOption)) {
+    if (m_parser.isSet(beginOption)) {
         bool ok;
-        query_.begin = parser_.value(beginOption).toUInt(&ok);
-        if (query_.begin < 0 || !ok)
+        m_query.begin = m_parser.value(beginOption).toUInt(&ok);
+        if (m_query.begin < 0 || !ok)
         {
-            return { Status::Error, QString("Incorrect begin spill number: %1").arg(query_.begin) };
+            return { Status::Error, QString("Incorrect begin spill number: %1").arg(m_query.begin) };
         }
     }
 
-    if (parser_.isSet(endOption)) {
+    if (m_parser.isSet(endOption)) {
         bool ok;
-        query_.end = parser_.value(endOption).toUInt(&ok);
-        if (query_.end < query_.begin || !ok)
+        m_query.end = m_parser.value(endOption).toUInt(&ok);
+        if (m_query.end < m_query.begin || !ok)
         {
-            return { Status::Error, QString("Incorrect end spill number: %1").arg(query_.end) };
+            return { Status::Error, QString("Incorrect end spill number: %1").arg(m_query.end) };
         }
     }
 
-    if (parser_.isSet(sizeOption)) {
+    if (m_parser.isSet(sizeOption)) {
         bool ok;
-        query_.size = parser_.value(sizeOption).toUInt(&ok);
-        if (query_.size < 1 || !ok)
+        m_query.size = m_parser.value(sizeOption).toUInt(&ok);
+        if (m_query.size < 1 || !ok)
         {
-            return { Status::Error, QString("Incorrect chunk size: %1").arg(query_.size) };
+            return { Status::Error, QString("Incorrect chunk size: %1").arg(m_query.size) };
         }
     }
 
-    if (parser_.isSet(numberOption)) {
+    if (m_parser.isSet(tailOption)) {
+        m_query.tail = true;
+    }
+
+    if (m_parser.isSet(numberOption)) {
         bool ok;
-        query_.number = parser_.value(numberOption).toUInt(&ok);
-        if (query_.number < 1 || !ok)
+        m_query.number = m_parser.value(numberOption).toUInt(&ok);
+        if (m_query.number < 1 || !ok)
         {
-            return { Status::Error, QString("Incorrect number of chunks: %1").arg(query_.number) };
+            return { Status::Error, QString("Incorrect number of chunks: %1").arg(m_query.number) };
         }
     }
 
-    if (parser_.isSet(delayOption)) {
+    if (m_parser.isSet(delayOption)) {
         bool ok;
-        query_.delay = parser_.value(delayOption).toUInt(&ok);
-        if (query_.delay < 1'000 || !ok)
+        m_query.delay = m_parser.value(delayOption).toUInt(&ok);
+        if (m_query.delay < 1'000 || !ok)
         {
-            return { Status::Error, QString("Incorrect delay: %1").arg(query_.delay) };
+            return { Status::Error, QString("Incorrect delay: %1").arg(m_query.delay) };
         }
     }
 
-    if (parser_.isSet(overlapOption)) {
+    if (m_parser.isSet(overlapOption)) {
         bool ok;
-        query_.overlap = parser_.value(overlapOption).toUInt(&ok);
-        if (query_.overlap < 0 || !ok)
+        m_query.overlap = m_parser.value(overlapOption).toUInt(&ok);
+        if (m_query.overlap < 0 || !ok)
         {
-            return { Status::Error, QString("Incorrect overlap: %1").arg(query_.overlap) };
+            return { Status::Error, QString("Incorrect overlap: %1").arg(m_query.overlap) };
         }
     }
 
-    const QStringList positionalArguments = parser_.positionalArguments();
+    const QStringList positionalArguments = m_parser.positionalArguments();
     if (positionalArguments.isEmpty() || positionalArguments.size() < 2)
     {
         return { Status::Error, "Arguments 'input' and 'output' required." };
@@ -135,8 +143,8 @@ ADCMEmulateParser::CommandLineParseResult ADCMEmulateParser::parseCommandLine()
     {
         return { Status::Error, "Several 'input' or 'output' arguments specified." };
     }
-    query_.input = positionalArguments.first();
-    query_.output = positionalArguments.last();
+    m_query.input = positionalArguments.first();
+    m_query.output = positionalArguments.last();
 
     return { Status::Ok };
 }

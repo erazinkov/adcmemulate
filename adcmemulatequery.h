@@ -13,6 +13,7 @@ struct ADCMEmulateQuery
     long long size{1};
     ulong delay{0};
     long long overlap{0};
+    bool tail{false};
 };
 
 #endif // ADCMEMULATEQUERY_H

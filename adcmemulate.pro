@@ -9,9 +9,13 @@ CONFIG -= app_bundle
 
 SOURCES += \
         adcmemulateparser.cpp \
+        adcmemulateprocess.cpp \
         channelmap.cpp \
+        controller.cpp \
         decoder.cpp \
-        main.cpp
+        main.cpp \
+        mainclass.cpp \
+        worker.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -21,6 +25,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     adcm_df.h \
     adcmemulateparser.h \
+    adcmemulateprocess.h \
     adcmemulatequery.h \
     channelmap.h \
-    decoder.h
+    controller.h \
+    decoder.h \
+    mainclass.h \
+    progressbar.h \
+    spinner.h \
+    worker.h

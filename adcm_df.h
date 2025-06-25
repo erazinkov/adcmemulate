@@ -77,7 +77,7 @@ struct adcm_counters_t {
 
 struct dec_det_t
 {    
-    uint8_t index;  // detector index
+    uint32_t index;  // detector index
     float amp;      // detector amplitude
     float rt;       // detector signal raise time
 } __attribute__ ((packed));
@@ -93,7 +93,7 @@ struct dec_ev_t
 struct dec_cnt_t
 {    
     double time;        // time of count measurement in seconds
-    u_int32_t rawhits;  // raw hit counters
+    std::vector<u_int32_t> rawhits;  // raw hit counters
 };
 
 #endif /* ADCM_DF_H */
