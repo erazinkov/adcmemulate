@@ -15,7 +15,6 @@ SOURCES += \
         decoder.cpp \
         main.cpp \
         mainclass.cpp \
-        myprocess.cpp \
         worker.cpp
 
 # Default rules for deployment.
@@ -32,7 +31,6 @@ HEADERS += \
     controller.h \
     decoder.h \
     mainclass.h \
-    myprocess.h \
     progressbar.h \
     spinner.h \
     worker.h

@@ -18,8 +18,3 @@ Controller::~Controller() {
     workerThread.wait();
 }
 
-//void Controller::handleResults(const QString &result)
-//{
-////    qDebug() << "Result:" << result;
-////    emit(closeApp());
-//}

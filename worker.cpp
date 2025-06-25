@@ -8,7 +8,7 @@
 #include "adcmemulateparser.h"
 #include "adcmemulateprocess.h"
 
-void Worker::doWork(const QString &parameter) {
+void Worker::doWork(const QString &) {
     QString result;
     ADCMEmulateParser adcmEmulateParser;
     if (adcmEmulateParser.ok())
@@ -22,6 +22,6 @@ void Worker::doWork(const QString &parameter) {
                                               QList<qint64>(decoder.offsets().begin(), decoder.offsets().end()));
         adcmEmulateProcess.process();
     }
-    emit resultReady(QString("Finished"));
+    emit resultReady(QString(""));
 }
 

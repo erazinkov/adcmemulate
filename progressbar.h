@@ -32,7 +32,7 @@ public:
                 std::cout << " ";
             }
         }
-        std::cout << "]" << std::setw(3) << p << "%\r";
+        std::cout << "]" << std::setw(4) << p << "%\r";
         std::cout.flush();
         if (p == 100)
         {

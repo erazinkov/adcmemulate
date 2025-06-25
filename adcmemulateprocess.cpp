@@ -15,7 +15,8 @@ ADCMEmulateProcess::ADCMEmulateProcess(const ADCMEmulateQuery query,
     QFile inputFile(m_query.input);
     if (!inputFile.open(QIODevice::ReadOnly))
     {
-        qFatal("Can't open input file");
+        std::cout << "\b" << "Can't open input file " << m_query.input.toStdString() << std::endl;
+        return;
     }
     m_offsets.push_back(inputFile.size());
     inputFile.close();
@@ -25,22 +26,22 @@ bool ADCMEmulateProcess::isValid() const
 {
     if (m_query.begin > m_offsets.size() - 1 - 1)
     {
-        qInfo() << "Ensure 'begin' <=" <<  m_offsets.size() - 1 - 1;
+        std::cout << "Ensure 'begin' <= " <<  m_offsets.size() - 1 - 1 << std::endl;
         return false;
     }
     if (m_query.size > m_offsets.size() - 1)
     {
-        qInfo() << "Ensure 'size' <=" <<  m_offsets.size() - 1;
+        std::cout << "Ensure 'size' <= " <<  m_offsets.size() - 1 << std::endl;
         return false;
     }
     if (m_query.begin + m_query.size > m_offsets.size() - 1)
     {
-        qInfo() << "Ensure 'begin' + 'size' <=" << m_offsets.size() - 1;
+        std::cout << "Ensure 'begin' + 'size' <= " << m_offsets.size() - 1 << std::endl;
         return false;
     }
     if (m_query.overlap - m_query.size > 0)
     {
-        qInfo() << "Ensure 'overlap' < 'size'";
+        std::cout << "Ensure 'overlap' < 'size'" << std::endl;
         return false;
     }
     return true;
@@ -50,19 +51,20 @@ void ADCMEmulateProcess::process()
 {
     if (isValid())
     {
-        m_query.delay ? emulate() : handle();
+        m_query.delay ? emulate() : Spinner::show([&](){handle();});
     }
 }
 
 void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, QDataStream &in) const
 {
     QString fileNameOutput{m_query.output};
-    QString postFix{QString("_%1_%2").arg(begin).arg(begin + size  + ( size != 1 ? -1 : 0))};
+    QString postFix{QString("_%1_%2").arg(begin).arg( begin + (size != 1 ? size : 0) + (size != 1 ? -1 : 0) )};
     fileNameOutput.append(postFix);
     QFile outputFile(fileNameOutput);
     if (!outputFile.open(QIODevice::WriteOnly))
     {
-        qFatal("Can't open output file");
+        std::cout << "\b" << "Can't open output file " << fileNameOutput.toStdString() << std::endl;
+        return;
     }
     QDataStream out(&outputFile);
     QList<SelectedPosition> selectedPositions;
@@ -80,21 +82,25 @@ void ADCMEmulateProcess::handleProcess(long long &begin, const long long &size, 
         if (rb == ba.size())
         {
             pb += rb;
-            out.writeRawData(ba.data(), static_cast<int>(ba.size()));
+            auto wb{out.writeRawData(ba.data(), static_cast<int>(ba.size()))};
+            if (rb != wb)
+            {
+                std::cout << "Incorrect size of spill (writing) at " << item.position << std::endl;
+                return;
+            }
         }
         else
         {
-            qInfo() << "Incorrect size of spill at " << item.position;
+            std::cout << "\b" << "Incorrect size of spill (reading) at " << item.position << std::endl;
             return;
         }
     }
     outputFile.close();
-
     begin += size;
     begin -= m_query.overlap;
     if (pb)
     {
-        qInfo() << fileNameOutput;
+        std::cout << "\b" << fileNameOutput.toStdString() << std::endl;
     }
 }
 
@@ -120,24 +126,26 @@ void ADCMEmulateProcess::emulateProcess(const long long &begin, const long long 
             QFile outputFile(m_query.output);
             if (!outputFile.open(QIODevice::WriteOnly))
             {
-                qFatal("Can't open output file");
+                std::cout << "Can't open output file " << m_query.output.toStdString() << std::endl;
+                return;
             }
             QDataStream out(&outputFile);
             auto wb{out.writeRawData(ba.data(), static_cast<int>(ba.size()))};
             if (rb != wb)
             {
-                qInfo() << "Incorrect size of spill at" << item.position;
+                std::cout << "Incorrect size of spill (writing) at " << item.position << std::endl;
+                return;
             }
             else
             {
-                qInfo() << QString("%1").arg(wb) << QDateTime::currentDateTime().toString(Qt::TextDate);
+                std::cout << wb << " " << QDateTime::currentDateTime().toString(Qt::TextDate).toStdString() << std::endl;
             }
             outputFile.close();
             this->thread()->msleep(m_query.delay);
         }
         else
         {
-            qInfo() << "Incorrect size of spill at" << item.position;
+            qInfo() << "Incorrect size of spill (reading) at " << item.position;
             return;
         }
     }
@@ -151,7 +159,8 @@ void ADCMEmulateProcess::handle() const
     QFile inputFile(m_query.input);
     if (!inputFile.open(QIODevice::ReadOnly))
     {
-        qFatal("Can't open input file");
+        std::cout << "\b" << "Can't open input file " << m_query.input.toStdString() << std::endl;
+        return;
     }
     QDataStream in(&inputFile);
 
@@ -175,7 +184,8 @@ void ADCMEmulateProcess::emulate() const
     QFile inputFile(m_query.input);
     if (!inputFile.open(QIODevice::ReadOnly))
     {
-        qFatal("Can't open input file");
+        std::cout << "\b" << "Can't open input file" << m_query.input.toStdString() << std::endl;
+        return;
     }
     QDataStream in(&inputFile);
 

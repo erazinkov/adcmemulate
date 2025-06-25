@@ -2,17 +2,39 @@
 #define SPINNER_H
 
 #include <iostream>
+#include <vector>
+#include <thread>
+
+#include <functional>
 
 class Spinner
 {
 public:
-    static void show()
+    static void show(std::function<void()> f)
     {
-        static int pos{0};
-        const char cursor[4]{'|', '/', '-', '\\'};
-        std::cout << "\r" << cursor[pos] << std::flush;
-        pos = (pos + 1) % 4;
+        bool stop{false};
+        std::thread spinner_thread([&]() {
+                while (!stop) {
+                    Spinner::process();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+            });
+        f();
+        stop = true;
+        spinner_thread.join();
+        std::cout << "\b";
+        std::cout << std::flush;
     }
+private:
+    static void process()
+    {
+        static size_t i{0};
+        std::vector<char> chars{'/', '-', '\\', '|'};
+        std::cout << "\b" << chars.at(i);
+        std::cout << std::flush;
+        i = (i + 1) % chars.size();
+    }
+
 };
 
 #endif // SPINNER_H
